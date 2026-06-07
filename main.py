@@ -1,33 +1,44 @@
-from gpiozero import OutputDevice, InputDevice
+from gpiozero import LED, Button
+from light_sensor import read_ldr
 from time import sleep
-import time
+from datetime import datetime
 
-LDR_PIN = 17
-MAX_STEPS = 100      # increase if too dark and always returning 100
-STEP_DELAY = 0.01    # 10ms per step = 1 second max charge time
+led = LED(16)
+button = Button(24)
+is_running = True
+interval = 1000 # in ms
+LIGHT_THRESHOLD = 0.6
 
-def read_ldr():
-    # Discharge capacitor
-    ldr = OutputDevice(pin=LDR_PIN, active_high=True, initial_value=False)
-    sleep(0.1)
-    ldr.close()
+def on_btn_pressed():
+    global is_running
+    is_running = not is_running
+    print(f"Button pressed. {'Turning on.' if is_running else 'Turning off.'}")
 
-    # Switch to input and count charge steps
-    ldr = InputDevice(pin=LDR_PIN, pull_up=None, active_state=True)
-    count = 0
-    for i in range(1, MAX_STEPS + 1):
-        if ldr.is_active:
-            count = i
-            break
-        sleep(STEP_DELAY)
-    ldr.close()
+def get_timestamp():
+    return int(datetime.now().timestamp() * 1000)
 
-    # Normalize to 0.0 (dark) -> 1.0 (bright)
-    if count == 0:
-        return 0.0
-    return 1.0 - (count / MAX_STEPS)
+button.when_pressed = on_btn_pressed
 
 while True:
-    value = read_ldr()
-    print(f"Light value: {value:.2f}")
-    sleep(1)
+    before_time = get_timestamp()
+
+    if not is_running:
+        led.off()
+        sleep(interval / 1000)
+        continue
+
+    ldr_value = read_ldr()
+    if ldr_value < LIGHT_THRESHOLD and led.value == 0:
+        led.on()
+    elif ldr_value >= LIGHT_THRESHOLD and led.value == 1:
+        led.off()
+
+    if not is_running:
+        continue
+
+    print(f"Light value: {ldr_value:.2f}")
+
+    after_time = get_timestamp()
+    time_buffer = max(0, interval - (after_time - before_time))
+
+    sleep(time_buffer / 1000)
