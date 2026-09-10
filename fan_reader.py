@@ -1,7 +1,7 @@
 from gpiozero import DigitalInputDevice
 from time import sleep
 
-TACH_PIN = 17
+TACH_PIN = 4
 PULSES_PER_REV = 2
 
 tach = DigitalInputDevice(TACH_PIN, pull_up=True, bounce_time=None)  # bounce_time=None disables debouncing
