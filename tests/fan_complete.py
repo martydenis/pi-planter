@@ -1,11 +1,11 @@
-import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO # type: ignore
 from time import sleep
 
 
 class Fan:
     pin_power = 17
 
-    pin_setter = 27
+    pin_setter = 27 # Needs to be a PWM specific GPIO pin
     pwm_frequency = 500
 
     pin_reader = 22

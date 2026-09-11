@@ -1,44 +1,50 @@
-from gpiozero import LED, Button
-from light_sensor import read_ldr
-from time import sleep
+import RPi.GPIO as GPIO # type: ignore
+from components import *
+import time
 from datetime import datetime
 
-led = LED(16)
-button = Button(24)
-is_running = True
-interval = 1000 # in ms
+INTERVAL = 2000 # in ms
 LIGHT_THRESHOLD = 0.6
-
-def on_btn_pressed():
-    global is_running
-    is_running = not is_running
-    print(f"Button pressed. {'Turning on.' if is_running else 'Turning off.'}")
 
 def get_timestamp():
     return int(datetime.now().timestamp() * 1000)
 
-button.when_pressed = on_btn_pressed
+def main():
+    led = Output(18)
+    ldr = Photoresistor(14)
+    switch = Switch(16)
+    pump = Output(27)
 
-while True:
-    before_time = get_timestamp()
+    pump.on()
+    print("Pump on")
 
-    if not is_running:
-        led.off()
-        sleep(interval / 1000)
-        continue
+    try:
+        while True:
+            # before_time = get_timestamp()
 
-    ldr_value = read_ldr()
-    if ldr_value < LIGHT_THRESHOLD and led.value == 0:
-        led.on()
-    elif ldr_value >= LIGHT_THRESHOLD and led.value == 1:
-        led.off()
+            ldr_value = ldr.read()
+            print(f"Light value: {ldr_value:.2f}")
+            if ldr_value < LIGHT_THRESHOLD:
+                led.on()
+            elif ldr_value >= LIGHT_THRESHOLD:
+                led.off()
 
-    if not is_running:
-        continue
+            # pump.on()
+            # print("Pump on")
+            # time.sleep(5)
+            # print("Pump off")
+            # pump.off()
 
-    print(f"Light value: {ldr_value:.2f}")
+            time.sleep(5)
 
-    after_time = get_timestamp()
-    time_buffer = max(0, interval - (after_time - before_time))
+            # after_time = get_timestamp()
+            # buffer = max(0, INTERVAL - (after_time - before_time))
+            # time.sleep(buffer / 1000)
+    except KeyboardInterrupt:
+        print("\nStopping, cleaning up GPIO...")
+    finally:
+        GPIO.cleanup()
 
-    sleep(time_buffer / 1000)
+
+if __name__ == "__main__":
+    main()
