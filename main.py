@@ -10,10 +10,11 @@ def get_timestamp():
     return int(datetime.now().timestamp() * 1000)
 
 def main():
-    led = Output(18)
+    led = Output(23)
     ldr = Photoresistor(14)
-    switch = Switch(16)
+    float_switch = Switch(16)
     pump = Output(27)
+    fan = Fan(6, 13, 19)
 
     pump.on()
     print("Pump on")

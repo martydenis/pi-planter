@@ -15,3 +15,12 @@ class Output:
 
     def off(self):
         GPIO.output(self.gpio_pin, GPIO.LOW)
+
+    def get_state(self):
+        return GPIO.input(self.gpio_pin)
+
+    def toggle(self):
+        if GPIO.input(self.gpio_pin):
+            GPIO.output(self.gpio_pin, GPIO.LOW)
+        else:
+            GPIO.output(self.gpio_pin, GPIO.HIGH)

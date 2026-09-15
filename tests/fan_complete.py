@@ -53,18 +53,21 @@ class Fan:
     def count_pulse(self, pin):
         self.pulse_count += 1
 
+    def test(self):
+        self.set_speed(40)
+        sleep(15)
+        self.set_speed(1)
+        sleep(15)
+        self.set_speed(100)
+        sleep(15)
+        self.set_speed(0)
+        sleep(15)
+
 def main():
     fan = Fan()
     try:
         while True:
-            fan.set_speed(40)
-            sleep(15)
-            fan.set_speed(1)
-            sleep(15)
-            fan.set_speed(100)
-            sleep(15)
-            fan.set_speed(0)
-            sleep(15)
+            fan.test()
     except KeyboardInterrupt:
         print("\nStopping test, cleaning up GPIO...")
     finally:
